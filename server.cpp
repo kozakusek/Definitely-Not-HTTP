@@ -11,13 +11,13 @@
 using namespace std;
 
 constexpr int queue_length = 10;           // TCP queue.
-int port_num = 8080;                       // We set the default to 8080.
+uint16_t port_num = 8080;                  // We set the default to 8080.
 unordered_map<string, string> servers_map; // A mapping for correlated servers' resources.
-string dir;                                // Directory with server's resources.
+string directory;                          // Directory with server's resources.
 
 // Interprets the program parameters and extracts the path to the file
 // with correlated servers' resources to 'servers'.
-void init_args(int argc, char *argv[], filesystem::path &servers) {
+void init_args(int argc, const char *argv[], filesystem::path &servers) {
     filesystem::path files = argv[1];
     servers = argv[2];
 
@@ -25,7 +25,7 @@ void init_args(int argc, char *argv[], filesystem::path &servers) {
     if (argc == 4) {
         // Validate the numeric value of argv[3].
         if (string(argv[3]).find_first_not_of("0123456789") == string::npos) {
-            port_num = stoi(argv[3]);
+            port_num = static_cast<uint16_t>(stoul(argv[3]));
         } else {
             // An empty base exception for notifying the caller about lethal errors.
             throw exception();
@@ -36,13 +36,13 @@ void init_args(int argc, char *argv[], filesystem::path &servers) {
         throw exception();
     }
 
-    dir = files.string();
+    directory = files.string();
 }
 
 // Extracts the data from the file given in the program arguments,
 // now located under 'servers'. Creates the mapping from resources
 // to http urls as described in the task.
-void load_servers(filesystem::path &servers) {
+void load_servers(filesystem::path const &servers) {
     fstream fstr(servers);
     string content, cont_key, cont_val;
     stringstream content_stream;
@@ -65,7 +65,7 @@ void load_servers(filesystem::path &servers) {
     fstr.close();
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char *argv[]) {
     if (argc < 3 || 4 < argc) {
         // Incorrect number of arguments.
         return EXIT_FAILURE;
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
         // Read and interpret the messages from the client and respond to them.
         // Ends connection by throwing close_exc.
         try {
-            manage_messages(is, msg_sock, servers_map, dir);
+            manage_messages(is, msg_sock, servers_map, directory);
         } catch (close_exc &e) {}
 
         if (close(msg_sock) < 0) {

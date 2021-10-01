@@ -8,7 +8,7 @@
 
 // Taking into account the maximum length of a path, possible
 // values of <method> and of course the forum - we set this value to 2^13.
-constexpr int max_line_len = 1 << 13;
+constexpr std::size_t max_line_len = 1 << 13;
 
 // An empty exception for ending the connection.
 struct close_exc : public std::exception {
@@ -23,18 +23,18 @@ struct msg_data {
     bool flag_404{};                    // The file would not be found anyway.
     unsigned int code{};                // HTTP code to be sent.
     std::string reason_phrase;
-    std::string headers[3];             // 0 -- Connection; 1  -- Content-Length; 3 -- Location.
-    int msg_sock{};
-    std::string dir;                    // The directory path with server's resources.
+    std::string headers[3];             // 0 -- Connection; 1 -- Content-Length; 3 -- Location.
+    int msg_sock_{};
+    std::string dir_;                   // The directory path with server's resources.
 
     msg_data() = default;
 
-    msg_data(int msg_sock, std::string &dir);
+    msg_data(int msg_sock, std::string const &dir);
 };
 
 // Main logic of intepreting the http messages sent to our server.
 // More in message_interpreter.cpp.
 void manage_messages(std::istream &is, int msg_sock, std::unordered_map<std::string,
-                     std::string> &map, std::string &dir);
+                     std::string> const &map, std::string const &dir);
 
 #endif //SERVER_HTTP_MESSAGE_INTERPRETER_H
